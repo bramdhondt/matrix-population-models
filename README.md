@@ -11,7 +11,7 @@ A loose collection of theoretical and applied work on **matrix population models
 
 Undeniably the 'bible' on the subject, Caswell (2001) provides a definitive overview of the mathematical foundations of MPMs, and all their possible applications. Fortunately, all standard MPM operations have become accessible through the excellent [popdemo](https://github.com/iainmstott/popdemo) R package (Stott _et al._ 2012). Also, numerous population matrices can now be easily accessed via the [rcom(p)adre](https://github.com/jonesor/Rcompadre) package (Jones _et al._ 2022). In effect, this repository is anticipated to contain several applications of these package, or snippets of code beyond them.
 
-## Hastings _et al._ (2006) Theor. Pop. Biol
+## Hastings _et al._ (2006) Theor. Pop. Biol.
 
 > Hastings, A., Hall, R. J., & Taylor, C. M. (2006). A simple approach to optimal control of invasive species. Theoretical population biology, 70(4), 431-435.
 
