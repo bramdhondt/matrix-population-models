@@ -13,7 +13,7 @@ Undeniably the 'bible' on the subject, Caswell (2001) provides a definitive over
 
 ## Hastings _et al._ (2006) Theor. Pop. Biol.
 
-> Hastings, A., Hall, R. J., & Taylor, C. M. (2006). A simple approach to optimal control of invasive species. Theoretical population biology, 70(4), 431-435.
+> Hastings, A., _et al._ (2006). A simple approach to optimal control of invasive species. Theoretical population biology, 70(4), 431-435.
 
 Hastings _et al._ (2006) have extended MPM's base formula to grasp the situation where a population's trajectory is affected by recurrently _removing_ individuals, rather than by affecting _vital rates_ directly. The equation is then used for the optimization of population control, through linear programming techniques. Such removal-based management is the standard approach to invasive species control, but in practice, calculations are almost never made...
 
