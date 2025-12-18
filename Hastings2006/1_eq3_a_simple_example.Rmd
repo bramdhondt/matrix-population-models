@@ -1,0 +1,98 @@
+$$N_{T} = L^TN_{0}-\sum_{i=1}^{T}L^{T+1-i}H_{i}$$
+
+This is kind of an introduction to the above formula using an easy example so that the reasoning can easily be tracked. This is not only for illustrative reasons, but it also acts as a reference to check whether the automated flow (functions), the scripting of which is way more abstract, is correct.
+
+First, I avoid using popdemo functions, so that we stay closer to the core mathematics. Nonetheless, I already provide the popdemo alternative, for direct comparison. Note how the project() function of popdemo has the huge advantage that, for a given time horizon t, all intermediate values are provided as well. Also, by using the option return.vec = FALSE/TRUE, you can switch between output per stage, or summed over stages.
+
+As a time horizon, we opt for five generations ($T = 5$).
+
+```{r transition matrix L}
+L <- matrix(c(0, 0.1, 0.1, 
+              1, 1.0, 1.0,
+              0, 0.3, 1.2),
+            nrow = 3,
+            byrow = TRUE)
+
+rownames(L) <- colnames(L) <- c("seedlings",
+                                "isolates",
+                                "meadows")
+
+print(L)
+```
+
+```{r initial vector N0}
+N0 <- matrix(c(0.1,
+               0.1,
+               0.1),
+             nrow = 3,
+             byrow = TRUE)
+
+rownames(N0) <- rownames(L)
+print(N0)
+```
+
+The area removed is $H$. Removal is performed at the start of the year. This is important to understand, because for one thing, it means that you will nowhere see the value of $H$ in the ghost matrix; the first value you will encounter directly is $LH$, i.e. the end-of-year ghost of what was newly removed at the start of the year.
+
+```{r removal vector H}
+H <- matrix(c(0.,
+              0.1,
+              0),
+             nrow = 3,
+             byrow = TRUE)
+```
+
+If there would be **no removal**, an MPM's base formula $L^TN_{0}$ gives the population extent.
+
+$$N_{T} = L^TN_{0}$$
+
+```{r simple projection - without popdemo}
+library(expm) # exponents of matrices (L^2 = element-wise, L%^%2 = L x L)
+
+N1 <- sum(L%^%1 %*% N0)
+N2 <- sum(L%^%2 %*% N0)
+N3 <- sum(L%^%3 %*% N0)
+N4 <- sum(L%^%4 %*% N0)
+N5 <- sum(L%^%5 %*% N0)
+
+print(c(sum(N0), N1, N2, N3, N4, N5))
+```
+
+```{r simple projecten - with popdemo}
+library(popdemo)
+
+Nt <- project(L, vector = N0, time = 5, return.vec = T)
+
+print(Nt)     # across stages
+print(Nt@vec) # per stage
+```
+
+Let's now include **removal**. The equation on top states that from this total projection, we now have to substract a contingent of "what could have been", i.e. that which would have resulted from the removed portion ($-L^TH$), for each of the time steps that have passed ($sum_{i=1}^{T}$).
+
+I refer to the removed cohorts and how they would have propagated as 'ghosts', their yearly numbers collected in the *ghost matrix*.
+
+```{r removal - without popdemo}
+
+total  = sum(L%^%5 %*% N0)         # total (actual + removed) - as above
+
+ghost1 = sum(L%^%(5+1-1) %*% H)    # removed in year 1 (five years ago)
+ghost2 = sum(L%^%(5+1-2) %*% H)    # removed in year 2 (four years ago)
+ghost3 = sum(L%^%(5+1-3) %*% H)    # removed in year 3 (three years ago)
+ghost4 = sum(L%^%(5+1-4) %*% H)    # removed in year 4 (two years ago)
+ghost5 = sum(L%^%(5+1-5) %*% H)    # removed in year 5 (previous year)
+
+total-sum(ghost1, ghost2, ghost3, ghost4, ghost5)
+```
+
+```{r removal - with popdemo}
+
+total.  = project(L, vector = N0, time = 5, return.vec = F)
+ghost.1 = project(L, vector = H,  time = 5+1-1, return.vec = F) # removed in year 1 (five years ago)
+ghost.2 = project(L, vector = H,  time = 5+1-2, return.vec = F) # removed in year 2 (four years ago)
+ghost.3 = project(L, vector = H,  time = 5+1-3, return.vec = F) # removed in year 3 (three years ago)
+ghost.4 = project(L, vector = H,  time = 5+1-4, return.vec = F) # removed in year 4 (two years ago)
+ghost.5 = project(L, vector = H,  time = 5+1-5, return.vec = F) # removed in year 5 (previous year)
+
+total.[6]-(ghost.1[6]+ghost.2[5]+ghost.3[4]+ghost.4[3]+ghost.5[2])
+```
+
+This now opens the way to the generic formulation, in the next script (2_eq3_...).

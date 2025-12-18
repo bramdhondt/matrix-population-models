@@ -1,0 +1,110 @@
+---
+title: "A matrix model for populations with recurrent removal (Hastings _et al._ 2006, eq. 3)"
+author: "Bram D'hondt"
+date: "2025-11-10"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r prep packages}
+library(popdemo)
+library(tidyverse)
+```
+
+# Introduction
+
+Equation 3 in Hastings _et al._ (2006) extends the base formula for matrix population model projections with a scenario of recurrent removal. In fact, it is the first time that I came across such a formula, despite the fact that such populations are ubiquitous (at least in the context of managed populations). This why I take the effort of developing it here. Hastings _et al._ (2006) then use this formula for linear programming. I develop on that elsewhere.
+
+$$N_{T} = L^TN_{0}-\sum_{i=1}^{T}L^{T+1-i}H_{i}$$
+> Hastings, A., Hall, R. J., & Taylor, C. M. (2006). A simple approach to optimal control of invasive species. Theoretical population biology, 70(4), 431-435.
+
+[...]
+
+The area removed is $H$. Removal is performed at the start of the year. This is important to understand, because for one thing, it means that you will nowhere see the value of $H$ in the ghost matrix; the first value you will encounter directly is $LH$, i.e. the end-of-year ghost of what was newly removed at the start of the year.
+
+[...]
+
+Let's also formulate $H$ as a matrix, with years as columns, because that opens up possibilities for time-varying removal.
+
+```{r}
+# T = 4
+Hmat <- matrix()
+```
+
+[...]
+
+I refer to the removed cohorts and how they would have propagated as 'ghosts', their yearly numbers collected in the *ghost matrix*.
+
+[...]
+
+
+################ tot hier evacuatie naar 1_eq3_...
+
+```{r}
+# building on the above, I now develop a general formulation which constructs a full ghost matrix
+
+mpm_removal <- function(start.vec, trans.mat, removal, T){
+  # "total population" matrix
+  total <- project(trans.mat, vector = start.vec, time = T, return.vec = F) # yields vector of length T+1
+  # "ghost population" matrix
+  ## template
+  ghost <- matrix(data = 0, nrow = T+1, ncol = T+1) # all zeros, same length of total
+  ## populate
+  for (i in 1:T)
+  {propagation <- project(L, vector = H, time = T-i+1, return.vec = F)
+  ghost[i,(i+1):ncol(ghost)] <- tail(propagation, -1) # copy in the values, apart from the start value
+  }
+  ## names
+  colnames(ghost) <- paste0("n", 0:(ncol(ghost) - 1))
+  # "net population" matrix
+  net <- total - colSums(ghost)
+  # output
+  return(list(total = total,
+              ghost = ghost,
+              net   = net))
+  }
+
+# with H fixed over time, note that the same series of numbers appears in each row, so there exist alternative (easier) ways of coding. The current way is preferred as it allows for time-varying H.
+```
+
+```{r test}
+A <- mpm_removal(start.vec = N0,
+                 trans.mat = L,
+                 removal = H,
+                 T = 10)
+print(A)
+```
+
+# Plot
+
+```{r prepare formats}
+A.total <- data.frame(
+  time = seq_along(A$total),
+  pop = as.numeric(A$total)
+  )
+
+A.ghost.1 <- 
+```
+
+```{r}
+# ggplot() +
+#   # net
+#   geom_col(data = data.frame(time = seq_along(A$net),
+#                              pop = as.numeric(A$net)),
+#            aes(x = time, y = pop),
+#            fill = "black") +
+#   # ghosts
+#   geom_col(data = data.frame(time = seq_along(A$ghost[1,]),
+#                              pop = as.numeric(A$ghost[1,])),
+#            aes(x = time, y = pop),
+#            fill = "darkgrey") +
+#   geom_col(data = data.frame(time = seq_along(A$ghost[2,]),
+#                              pop = as.numeric(A$ghost[2,])),
+#            aes(x = time, y = pop),
+#            fill = "lightgrey") +
+#   labs(x = "Time step", y = "Population size") +
+#   theme_bw()
+```
