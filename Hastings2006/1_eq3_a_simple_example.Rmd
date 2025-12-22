@@ -1,5 +1,5 @@
 ---
-title: "A MPM with recurrent removal (Hastings _et al._ 2006) - preparatory document"
+title: "An MPM with recurrent removal (Hastings _et al._ 2006) - eq. 3"
 author: "Bram D'hondt"
 date: "2025-12-19"
 output: pdf_document
@@ -8,9 +8,20 @@ output: pdf_document
 ```{r setup, include=F}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 ```{r, include=F}
 library(expm)
 library(popdemo)
+```
+
+```{r prep matrix display, include=F}
+# based on https://data-and-the-world.onrender.com/posts/matrix-to-latex/
+array_to_LaTeX <- function(arr){
+  rows <- apply(arr, MARGIN=1, paste, collapse = " & ")
+  matrix_string <- paste(rows, collapse = " \\\\ ")
+  return(paste("$\\begin{bmatrix}", matrix_string, "\\end{bmatrix}$"))
+}
+# use in combination with chunck settings {r, results='asis'} and cat(array_to_LaTeX(.)) (see below) `
 ```
 
 # Introduction
@@ -25,7 +36,6 @@ As a time span, we opt for five steps (years), i.e. $T = 5$.
 
 # $L$, $N{0}$ and $H$ 
 
-$L$ is
 ```{r transition matrix L, echo=F}
 L <- matrix(c(0, 0.1, 0.1, 
               1, 1.0, 1.0,
@@ -33,14 +43,17 @@ L <- matrix(c(0, 0.1, 0.1,
             nrow = 3,
             byrow = TRUE)
 
-rownames(L) <- colnames(L) <- c("seedlings",
-                                "isolates",
-                                "meadows")
-
-print(L)
+# rownames(L) <- colnames(L) <- c("seedlings",
+#                                 "isolates",
+#                                 "meadows")
 ```
 
-$N_0$ is
+$L$ is
+```{r, echo=F, results='asis'}
+cat(array_to_LaTeX(L))
+```
+
+
 ```{r initial vector N0, echo=F}
 N0 <- matrix(c(0.1,
                0.1,
@@ -48,8 +61,12 @@ N0 <- matrix(c(0.1,
              nrow = 3,
              byrow = TRUE)
 
-rownames(N0) <- rownames(L)
-print(N0)
+# rownames(N0) <- rownames(L)
+```
+
+$N_0$ is
+```{r, echo=F, results='asis'}
+cat(array_to_LaTeX(N0))
 ```
 
 The area removed is $H$. Removal is performed at the **start of the year**. This is important to understand, because for one thing, it means that you will nowhere see the value of $H$ in the 'ghost matrix' (see further); the first value you will encounter directly is $LH$, i.e. the end-of-year 'ghost' of what was newly removed at the start of the year.
