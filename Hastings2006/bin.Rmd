@@ -1,0 +1,39 @@
+[...]
+
+Let's also formulate $H$ as a matrix, with years as columns, because that opens up possibilities for time-varying removal.
+
+```{r}
+# T = 4
+Hmat <- matrix()
+```
+
+# Plot
+
+```{r prepare formats}
+A.total <- data.frame(
+  time = seq_along(A$total),
+  pop = as.numeric(A$total)
+  )
+
+A.ghost.1 <- 
+```
+
+```{r}
+# ggplot() +
+#   # net
+#   geom_col(data = data.frame(time = seq_along(A$net),
+#                              pop = as.numeric(A$net)),
+#            aes(x = time, y = pop),
+#            fill = "black") +
+#   # ghosts
+#   geom_col(data = data.frame(time = seq_along(A$ghost[1,]),
+#                              pop = as.numeric(A$ghost[1,])),
+#            aes(x = time, y = pop),
+#            fill = "darkgrey") +
+#   geom_col(data = data.frame(time = seq_along(A$ghost[2,]),
+#                              pop = as.numeric(A$ghost[2,])),
+#            aes(x = time, y = pop),
+#            fill = "lightgrey") +
+#   labs(x = "Time step", y = "Population size") +
+#   theme_bw()
+```
